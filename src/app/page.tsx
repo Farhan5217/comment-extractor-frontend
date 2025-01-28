@@ -119,22 +119,27 @@ export default function Home() {
     if (data) {
       const workbook = XLSX.utils.book_new();
       
+      // Post Information Sheet
       const postInfo = [
         ['Post Title', data.post_title],
         ['Post Author', data.post_author],
-        ['Total Comments', data.comments.length.toString()]
+        ['Post Created At', data.post_created_at], // Add post date
+        ['Total Comments', data.total_comments.toString()]
       ];
       const postSheet = XLSX.utils.aoa_to_sheet(postInfo);
       XLSX.utils.book_append_sheet(workbook, postSheet, 'Post Information');
 
+      // Comments Sheet - Now with dates
       const commentsData = data.comments.map((comment, index) => [
         index + 1,
         comment.author,
         comment.text,
         comment.upvotes,
+        comment.created_at,         // Add comment date
         comment.reply?.author || '',
         comment.reply?.text || '',
-        comment.reply?.upvotes || ''
+        comment.reply?.upvotes || '',
+        comment.reply?.created_at || '' // Add reply date
       ]);
 
       const commentsHeaders = [
@@ -142,15 +147,18 @@ export default function Home() {
         'Comment Author',
         'Comment Text',
         'Comment Upvotes',
+        'Comment Date',          // Add header for comment date
         'Reply Author',
         'Reply Text',
-        'Reply Upvotes'
+        'Reply Upvotes',
+        'Reply Date'            // Add header for reply date
       ];
       commentsData.unshift(commentsHeaders);
 
       const commentsSheet = XLSX.utils.aoa_to_sheet(commentsData);
       
-      const colWidths = [5, 15, 50, 10, 15, 50, 10];
+      // Adjust column widths for new date columns
+      const colWidths = [5, 15, 50, 10, 15, 15, 50, 10, 15];
       commentsSheet['!cols'] = colWidths.map(width => ({ width }));
 
       XLSX.utils.book_append_sheet(workbook, commentsSheet, 'Comments');
@@ -168,30 +176,33 @@ export default function Home() {
   const handleJsonDownload = () => {
     if (data) {
       try {
-        // Create a formatted JSON object
+        // Create a formatted JSON object with dates
         const jsonData = {
           post_info: {
             title: data.post_title,
             author: data.post_author,
-            total_comments: data.comments.length
+            created_at: data.post_created_at,    // Add post date
+            total_comments: data.total_comments,
+            retrieved_comments: data.retrieved_comments
           },
           comments: data.comments.map((comment, index) => ({
             number: index + 1,
             author: comment.author,
             text: comment.text,
             upvotes: comment.upvotes,
+            created_at: comment.created_at,      // Add comment date
             reply: comment.reply ? {
               author: comment.reply.author,
               text: comment.reply.text,
-              upvotes: comment.reply.upvotes
+              upvotes: comment.reply.upvotes,
+              created_at: comment.reply.created_at  // Add reply date
             } : null
           }))
         };
 
-        // Convert to string with proper formatting
         const jsonString = JSON.stringify(jsonData, null, 2);
         
-        // Create blob and download
+        // Create and download file
         const blob = new Blob([jsonString], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');

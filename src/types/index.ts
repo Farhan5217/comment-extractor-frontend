@@ -42,6 +42,7 @@ export interface CommentResponse {
   post_title: string;
   post_url:string
   post_author: string;
+  post_created_at:string;
   total_comments: number;
   retrieved_comments:number
   text?: string;
