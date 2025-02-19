@@ -47,18 +47,18 @@ export default function Home() {
   };
 
   const formatCommentsForCopy = (data: CommentResponse): string => {
-    let text = `Post: ${data.post_title}\n`;
-    text += `Author: ${data.post_author}\n\n`;
+    let text = '';  // No post info, just comments
 
-    data.comments.forEach((comment, index) => {
-      text += `${index + 1}. ${comment.author} (${comment.upvotes} upvotes):\n`;
+    data.comments.forEach((comment) => {
+      // Just the comment text
       text += `${comment.text}\n`;
+      
+      // Just the reply text if exists
       if (comment.reply) {
-        text += `\nReply from ${comment.reply.author} `;
-        text += `(${comment.reply.upvotes} upvotes):\n`;
         text += `${comment.reply.text}\n`;
       }
-      text += '\n---\n\n';
+      
+      text += '\n';  // Add a single line break between comment blocks
     });
 
     return text;
